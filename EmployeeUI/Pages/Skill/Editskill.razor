@@ -1,0 +1,102 @@
+﻿@page "/skills/edit/{SkillId:int}"
+
+@using EmployeeUI.DTO
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Text.Json.Nodes
+
+@inject HttpClient Http
+@inject NavigationManager navManager
+
+
+<div class="row">
+    <div class="col-lg-8"></div>
+
+
+    @if (skill == null)
+    {
+        <p><em>Loading....</em></p>
+    }
+    else
+    {
+
+
+
+
+        <div class="row">
+            <div class="col-lg-8">
+                
+                <div class="row mb-3">
+                    <label class="col-md-4 col-form-label">Name</label>
+                    <input class="form-control" @bind="skill.SkillName">
+                    <span class="text-danger">@errors["Skill Name"]?[0]</span>
+
+                </div>
+               
+                <div class="row">
+                    <div class="offset-md-4 col-md-4 d-grid">
+                        <button class="btn btn-primary" @onclick="SaveSkill">Submit</button>
+                    </div>
+                    <div class="col-md-4 d-grid">
+                        <a class="btn btn-secondary d-grid col-md-4" href="/skills">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public int SkillId { get; set; }
+    public Skill skill { get; set; } = new Skill();
+    public SkillDto skilldata { get; set; } = new SkillDto();
+    public JsonNode errors { get; set; } = new JsonObject();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            skill = await Http.GetFromJsonAsync<Skill>($"https://localhost:7211/api/Skill/{SkillId}");
+            skill.SkillName = skill?.SkillName ?? "";
+           
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching employee data: {ex.Message}");
+        }
+    }
+
+    protected async Task SaveSkill()
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync("https://localhost:7211/api/Skill/" + SkillId, skill);
+            if (response.IsSuccessStatusCode)
+            {
+                navManager.NavigateTo("/skills");
+            }
+
+            else
+            {
+                var strResponse = await response.Content.ReadAsStringAsync();
+                //errors = await response.Content.ReadFromJsonAsync<JsonNode>();
+
+                try
+                {
+                    var jsonResponse = JsonNode.Parse(strResponse);
+                    errors = jsonResponse?["errors"] ?? new JsonObject();
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving employee data: {ex.Message}");
+        }
+    }
+}

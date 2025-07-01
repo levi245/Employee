@@ -1,0 +1,28 @@
+﻿@page "/employees/delete/{Id:int}"
+@inject HttpClient Http
+@inject NavigationManager navManager
+
+<h1 class="mb-3">Delete Employee</h1>
+<p>Are you sure do you want to delete this employee with ID @Id</p>
+<button class="btn btn-danger" @onclick="DeleteEmployee">Delete</button>
+<a class="btn btn-secondary" href="/employees">Cancel</a>
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+
+    private async Task DeleteEmployee()
+    {
+        var response = await Http.DeleteAsync($"https://localhost:7211/api/Employee/" + Id);
+        if (response.IsSuccessStatusCode)
+        {
+            // Redirect to the employee list page after successful deletion
+            navManager.NavigateTo("/employees");
+        }
+        else
+        {
+            // Handle error (e.g., show a message to the user)
+            Console.WriteLine("Error deleting employee.");
+        }
+    }
+}

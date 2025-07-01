@@ -1,0 +1,56 @@
+﻿@page "/skills/add"
+@using EmployeeUI.DTO;
+@using System.Text.Json.Nodes
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="mb-5"> New Skill</h1>
+
+            <div class="row mb-3">
+                <label class="col-md-4 col-form-lael">SkillName</label>
+                <input class="form-control" @bind="skillDto.SkillName">
+            </div>
+            <div class="row">
+                <div class="offset-md-4 col-md-4 d-grid">
+                    <button class="btn btn-primary" @onclick="SaveSkill">Add</button>
+                </div>
+                <div class="col-md-4 d-grid">
+                    <a class="btn btn-secondary d-grid col-md-4" href="/employees">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public SkillDto skillDto { set; get; } = new();
+    public JsonNode Errors { set; get; } = new JsonObject();
+
+    protected async Task SaveSkill()
+    {
+        var response = await Http.PostAsJsonAsync("https://localhost:7211/api/Skill", skillDto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/skills");
+        }
+        else
+        {
+            var strResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Json response: \n" + strResponse);
+
+            try
+            {
+                Errors = JsonNode.Parse(strResponse) ?? new JsonObject();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error parsing JSON response: " + ex.Message);
+                Errors = new JsonObject { ["error"] = "An error occurred while processing your request." };
+            }
+        }
+    }
+}

@@ -1,0 +1,45 @@
+﻿@page "/skills"
+@inject HttpClient Http
+
+<h3 class="text-center mb-3">Skill List</h3>
+<a class="btn btn-primary mb-3" href="/skills/add">Add Skill</a>
+
+
+@if (skills == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var skill in skills)
+            {
+                <tr>
+                    <td>@skill.SkillId</td>
+                    <td>@skill.SkillName</td>
+                    <td style="white-space:nowrap">
+
+                        <a class="btn btn-primary btn-sm" href="/skills/edit/@skill.SkillId">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="/skills/delete/@skill.SkillId">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<DTO.SkillDto>? skills;
+
+    protected override async Task OnInitializedAsync()
+    {
+        skills = await Http.GetFromJsonAsync<List<DTO.SkillDto>>("https://localhost:7211/api/Skill");
+    }
+}

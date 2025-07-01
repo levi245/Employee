@@ -1,0 +1,48 @@
+﻿@page "/employees"
+@inject HttpClient Http
+
+<h3 class="text-center mb-3">Employee List</h3>
+<a class="btn btn-primary mb-3" href="/employees/Create">Add new Employee</a>
+
+
+@if (employees == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Date Hired</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var emp in employees)
+            {
+                <tr>
+                    <td>@emp.Id</td>
+                    <td>@emp.FullName</td>
+                    <td>@emp.HiredOn</td>
+                    <td style="white-space:nowrap">
+                        <a class="btn btn-primary btn-sm" href="/employees/view/@emp.Id">View</a>
+                        <a class="btn btn-primary btn-sm" href="/employees/edit/@emp.Id">Edit</a>
+                        <a class="btn btn-danger btn-sm" href="/employees/delete/@emp.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<DTO.EmployeeDto>? employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        employees = await Http.GetFromJsonAsync<List<DTO.EmployeeDto>>("https://localhost:7211/api/Employee");
+    }
+}
+
